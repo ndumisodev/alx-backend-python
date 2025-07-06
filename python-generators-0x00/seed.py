@@ -21,9 +21,10 @@ import sys # For exiting if critical environment variables are missing
 # For local testing, default values are provided.
 DB_HOST = os.getenv('DB_HOST', 'localhost')
 DB_USER = os.getenv('DB_USER', 'root')
-DB_PASSWORD = os.getenv('DB_PASSWORD', 'password') # Replace with your MySQL root password
+DB_PASSWORD = os.getenv('DB_PASSWORD', 'password') 
 
-# --- Functions ---
+
+
 
 def connect_db():
     """
@@ -208,7 +209,7 @@ def insert_data(connection, data_file):
         if 'cursor' in locals() and cursor:
             cursor.close()
 
-# Example usage (as seen in 0-main.py, but not executed directly by seed.py)
+
 # This section is for demonstration and testing purposes if you run seed.py directly.
 # In the project, it's driven by 0-main.py.
 if __name__ == "__main__":

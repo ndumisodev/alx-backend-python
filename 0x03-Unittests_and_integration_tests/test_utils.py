@@ -5,6 +5,8 @@ from parameterized import parameterized
 from utils import access_nested_map
 from unittest.mock import patch, Mock
 from utils import get_json
+from unittest.mock import patch
+from utils import memoize
 
 class TestAccessNestedMap(unittest.TestCase):
     """ Test class for access_nested_map """
@@ -71,3 +73,63 @@ class TestGetJson(unittest.TestCase):
             
             # Assert the result matches test_payload
             self.assertEqual(result, test_payload)
+
+
+
+class TestMemoize(unittest.TestCase):
+    """ Test class for memoize decorator """
+    
+    def test_memoize(self):
+        """ Test that memoize caches the result properly """
+        
+        class TestClass:
+            """ Test class with memoized property """
+            
+            def a_method(self):
+                return 42
+
+            @memoize
+            def a_property(self):
+                return self.a_method()
+        
+        # Create instance of test class
+        test_instance = TestClass()
+        
+        # Patch a_method to track calls and return 42
+        with patch.object(TestClass, 'a_method', return_value=42) as mock_method:
+            # First call to a_property
+            result1 = test_instance.a_property()
+            # Second call to a_property
+            result2 = test_instance.a_property()
+            
+            # Assert correct results
+            self.assertEqual(result1, 42)
+            self.assertEqual(result2, 42)
+            
+            # Assert a_method was called only once
+            mock_method.assert_called_once()
+
+
+class TestMemoize(unittest.TestCase):
+    """Test for memoize decorator"""
+
+    def test_memoize(self):
+        """Test that a_method is only called once due to memoization"""
+
+        class TestClass:
+            def a_method(self):
+                return 42
+
+            @memoize
+            def a_property(self):
+                return self.a_method()
+
+        with patch.object(TestClass, 'a_method', return_value=42) as mock_method:
+            test_obj = TestClass()
+
+            result1 = test_obj.a_property
+            result2 = test_obj.a_property
+
+            self.assertEqual(result1, 42)
+            self.assertEqual(result2, 42)
+            mock_method.assert_called_once()

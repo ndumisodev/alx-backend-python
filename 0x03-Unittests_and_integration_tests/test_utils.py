@@ -23,7 +23,8 @@ class TestAccessNestedMap(unittest.TestCase):
     def test_access_nested_map(self, nested_map: dict,
                                path: tuple, expected_result: any) -> None:
         """
-        Tests that access_nested_map returns the expected result for valid inputs.
+        Tests that access_nested_map returns the expected result for valid
+        inputs.
         """
         self.assertEqual(access_nested_map(nested_map, path), expected_result)
 
@@ -32,10 +33,11 @@ class TestAccessNestedMap(unittest.TestCase):
         ({"a": 1}, ("a", "b"), "b"),
     ])
     def test_access_nested_map_exception(self, nested_map: dict,
-                                         path: tuple, expected_key: str) -> None:
+                                         path: tuple, expected_key: str) \
+            -> None:
         """
-        Tests that access_nested_map raises a KeyError with the expected message
-        for invalid paths.
+        Tests that access_nested_map raises a KeyError with the expected
+        message for invalid paths.
         """
         with self.assertRaises(KeyError) as cm:
             access_nested_map(nested_map, path)
@@ -102,7 +104,6 @@ class TestMemoize(unittest.TestCase):
             self.assertEqual(result1, 42)
             self.assertEqual(result2, 42)
             mock_a_method.assert_called_once()
-
 
 
 # #!/usr/bin/env python3

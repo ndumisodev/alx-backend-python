@@ -7,5 +7,5 @@ router.register(r'conversations', ConversationViewSet, basename='conversation')
 router.register(r'messages', MessageViewSet, basename='message')
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('', include(router.urls)),  # ✅ This includes all routes from the router
 ]

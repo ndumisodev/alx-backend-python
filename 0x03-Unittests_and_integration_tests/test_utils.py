@@ -110,29 +110,29 @@ class TestGetJson(unittest.TestCase):
 #             mock_method.assert_called_once()
 
 
-class TestMemoize(unittest.TestCase):
-    """Test for memoize decorator"""
+# class TestMemoize(unittest.TestCase):
+#     """Test for memoize decorator"""
 
-    def test_memoize(self):
-        """Test that a_method is only called once due to memoization"""
+#     def test_memoize(self):
+#         """Test that a_method is only called once due to memoization"""
 
-        class TestClass:
-            def a_method(self):
-                return 42
+#         class TestClass:
+#             def a_method(self):
+#                 return 42
 
-            @memoize
-            def a_property(self):
-                return self.a_method()
+#             @memoize
+#             def a_property(self):
+#                 return self.a_method()
 
-        with patch.object(TestClass, 'a_method', return_value=42) as mock_method:
-            test_obj = TestClass()
+#         with patch.object(TestClass, 'a_method', return_value=42) as mock_method:
+#             test_obj = TestClass()
 
-            result1 = test_obj.a_property
-            result2 = test_obj.a_property
+#             result1 = test_obj.a_property
+#             result2 = test_obj.a_property
 
-            self.assertEqual(result1, 42)
-            self.assertEqual(result2, 42)
-            mock_method.assert_called_once()
+#             self.assertEqual(result1, 42)
+#             self.assertEqual(result2, 42)
+#             mock_method.assert_called_once()
 
 
 
@@ -145,38 +145,28 @@ class TestMemoize(unittest.TestCase):
         """
         Tests that a method decorated with memoize is called only once.
         """
-        # Define TestClass inside the test method for isolation
         class TestClass:
             """A test class for memoization."""
             def a_method(self) -> int:
                 """Returns a fixed value."""
                 return 42
 
-            @memoize # This is the decorator we are testing
+            @memoize
             def a_property(self) -> int:
                 """A memoized property that calls a_method."""
-                return self.a_method() # This is the method we will mock
+                return self.a_method()
 
-        # Use patch.object as a context manager to mock 'a_method' on TestClass
-        # mock_a_method will be the Mock object that replaces TestClass.a_method
-        with patch.object(TestClass, 'a_method', return_value=42) as mock_a_method:
-            # Instantiate the TestClass AFTER patching, so it uses the mock.
+        with patch.object(TestClass, 'a_method',
+                          return_value=42) as mock_a_method:
             test_instance = TestClass()
 
-            # Call the memoized property twice.
-            # On the first call, a_method should be invoked and its result cached.
+            # Call the memoized property twice
             result1 = test_instance.a_property
-            # On the second call, a_method should *not* be invoked; the cached result should be returned.
             result2 = test_instance.a_property
 
             # Assertions
-            # 1. Verify that both accesses returned the correct value.
             self.assertEqual(result1, 42)
             self.assertEqual(result2, 42)
-            # 2. Crucially, verify that the original a_method (now mocked) was called ONLY ONCE.
-            # This confirms that memoization is working as expected.
             mock_a_method.assert_called_once()
 
 
-
-            

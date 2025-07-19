@@ -1,36 +1,48 @@
 #!/usr/bin/env python3
-"""Unit tests for client.GithubOrgClient class."""
-
+"""
+Unit and integration tests for the client module.
+"""
 import unittest
-from parameterized import parameterized
-from unittest.mock import patch, Mock
-from client import GithubOrgClient
+from unittest.mock import patch, Mock # Import patch and Mock
+from parameterized import parameterized # Import parameterized
+
+from client import GithubOrgClient # Import the class to be tested
 
 
 class TestGithubOrgClient(unittest.TestCase):
-    """Test class for GithubOrgClient."""
+    """
+    Tests the GithubOrgClient class.
+    """
 
     @parameterized.expand([
-        ("google",),
-        ("abc",),
+        ("google",), # First test case: org_name = "google"
+        ("abc",),    # Second test case: org_name = "abc"
     ])
-    @patch('client.get_json')
-    def test_org(self, org_name, mock_get_json):
+    @patch('client.get_json') # Patch 'get_json' where it's imported/used in client.py
+                              # The patch decorator will pass a Mock object as the last argument
+                              # to the test method (here, mock_get_json).
+    def test_org(self, org_name: str, mock_get_json: Mock) -> None:
         """
-        Test that GithubOrgClient.org returns the correct value
-        without making external HTTP calls.
+        Tests that GithubOrgClient.org returns the correct value
+        and that get_json is called once with the expected argument.
         """
-        # Set up the mock return value
-        test_payload = {"login": org_name, "id": 123456}
+        # Define the payload that our mocked get_json should return.
+        # This simulates the actual API response for the organization.
+        test_payload = {"login": org_name}
         mock_get_json.return_value = test_payload
 
-        # Create client instance and call the method
+        # Create an instance of GithubOrgClient with the parameterized org_name.
         client = GithubOrgClient(org_name)
-        result = client.org
 
-        # Verify get_json was called exactly once with correct URL
+        # Call the method under test.
+        # This call will internally use the mocked get_json.
+        result = client.org()
+
+        # Assertion 1: Verify that the mocked get_json was called exactly once
+        # with the correct GitHub API URL for the organization.
         expected_url = f"https://api.github.com/orgs/{org_name}"
         mock_get_json.assert_called_once_with(expected_url)
 
-        # Verify the result matches the mock return value
+        # Assertion 2: Verify that the result returned by client.org()
+        # matches our expected test_payload.
         self.assertEqual(result, test_payload)

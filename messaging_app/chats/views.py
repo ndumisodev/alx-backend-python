@@ -1,48 +1,98 @@
-from django.shortcuts import render
-from rest_framework import viewsets, permissions
-from .models import Conversation, Message
-from .serializers import ConversationSerializer, MessageSerializer
-
+from rest_framework import viewsets, permissions, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from .models import Conversation, Message, User
+from .serializers import (
+    ConversationSerializer,
+    MessageSerializer,
+    UserSerializer
+)
 
 class ConversationViewSet(viewsets.ModelViewSet):
     """
-    ViewSet for listing and creating Conversations.
+    API endpoint for conversations with nested messages
     """
-    queryset =Conversation.objects.all()
+    queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         """
-        Filters conversations to only include those where the requesting user
-        is a participant.
+        Return only conversations where current user is a participant
         """
-        user = self.request.user
-        # Ensure the user is authenticated before filtering
-        if user.is_authenticated:
-            # Filter conversations where the current user is a participant
-            return Conversation.objects.filter(participants=user).order_by('-created_at')
-        return Conversation.objects.none() # Return empty queryset if user is not authenticated
+        return self.queryset.filter(participants=self.request.user).prefetch_related(
+            'participants',
+            'messages'
+        ).order_by('-created_at')
 
-    def perform_create(self, serializer):
+    @action(detail=True, methods=['post'])
+    def add_participant(self, request, pk=None):
         """
-        Custom create logic for conversations.
-        - Ensures the creator is automatically added as a participant.
+        Custom action to add participant to conversation
         """
-        # Save the conversation instance first, which handles participant_ids via the serializer's create()
-        instance = serializer.save()
-        # Ensure the creator is always a participant of the conversation
-        if self.request.user not in instance.participants.all():
-            instance.participants.add(self.request.user)
-        instance.save() # Save again if participants were added/modified
-
+        conversation = self.get_object()
+        user_id = request.data.get('user_id')
+        
+        if not user_id:
+            return Response(
+                {'error': 'user_id is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            user = User.objects.get(id=user_id)
+            conversation.participants.add(user)
+            return Response(
+                {'status': 'participant added'},
+                status=status.HTTP_200_OK
+            )
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'User not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
 class MessageViewSet(viewsets.ModelViewSet):
     """
-    ViewSet for listing and creating Messages.
+    API endpoint for messages within a conversation
     """
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    
+    def get_queryset(self):
+        """
+        Filter messages by conversation ID from URL and ensure user is participant
+        """
+        conversation_id = self.kwargs.get('conversation_pk')
+        conversation = Conversation.objects.filter(
+            id=conversation_id,
+            participants=self.request.user
+        ).first()
+        
+        if not conversation:
+            return Message.objects.none()
+            
+        return self.queryset.filter(
+            conversation=conversation
+        ).select_related('sender').order_by('sent_at')
+
+    def perform_create(self, serializer):
+        """
+        Automatically set sender and conversation when creating message
+        """
+        conversation = Conversation.objects.filter(
+            id=self.kwargs.get('conversation_pk'),
+            participants=self.request.user
+        ).first()
+        
+        if not conversation:
+            return Response(
+                {'error': 'Conversation not found or access denied'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+            
+        serializer.save(
+            sender=self.request.user,
+            conversation=conversation
+        )

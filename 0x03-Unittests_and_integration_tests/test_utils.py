@@ -76,38 +76,38 @@ class TestGetJson(unittest.TestCase):
 
 
 
-class TestMemoize(unittest.TestCase):
-    """ Test class for memoize decorator """
+# class TestMemoize(unittest.TestCase):
+#     """ Test class for memoize decorator """
     
-    def test_memoize(self):
-        """ Test that memoize caches the result properly """
+#     def test_memoize(self):
+#         """ Test that memoize caches the result properly """
         
-        class TestClass:
-            """ Test class with memoized property """
+#         class TestClass:
+#             """ Test class with memoized property """
             
-            def a_method(self):
-                return 42
+#             def a_method(self):
+#                 return 42
 
-            @memoize
-            def a_property(self):
-                return self.a_method()
+#             @memoize
+#             def a_property(self):
+#                 return self.a_method()
         
-        # Create instance of test class
-        test_instance = TestClass()
+#         # Create instance of test class
+#         test_instance = TestClass()
         
-        # Patch a_method to track calls and return 42
-        with patch.object(TestClass, 'a_method', return_value=42) as mock_method:
-            # First call to a_property
-            result1 = test_instance.a_property()
-            # Second call to a_property
-            result2 = test_instance.a_property()
+#         # Patch a_method to track calls and return 42
+#         with patch.object(TestClass, 'a_method', return_value=42) as mock_method:
+#             # First call to a_property
+#             result1 = test_instance.a_property()
+#             # Second call to a_property
+#             result2 = test_instance.a_property()
             
-            # Assert correct results
-            self.assertEqual(result1, 42)
-            self.assertEqual(result2, 42)
+#             # Assert correct results
+#             self.assertEqual(result1, 42)
+#             self.assertEqual(result2, 42)
             
-            # Assert a_method was called only once
-            mock_method.assert_called_once()
+#             # Assert a_method was called only once
+#             mock_method.assert_called_once()
 
 
 class TestMemoize(unittest.TestCase):
@@ -135,4 +135,4 @@ class TestMemoize(unittest.TestCase):
             mock_method.assert_called_once()
 
 
-            
+

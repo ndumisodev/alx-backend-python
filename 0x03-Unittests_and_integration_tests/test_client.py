@@ -3,10 +3,10 @@
 Unit and integration tests for the client module.
 """
 import unittest
-from unittest.mock import patch, Mock # Import patch and Mock
-from parameterized import parameterized # Import parameterized
+from unittest.mock import patch, Mock
+from parameterized import parameterized
 
-from client import GithubOrgClient # Import the class to be tested
+from client import GithubOrgClient
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -15,19 +15,17 @@ class TestGithubOrgClient(unittest.TestCase):
     """
 
     @parameterized.expand([
-        ("google",), # First test case: org_name = "google"
-        ("abc",),    # Second test case: org_name = "abc"
+        ("google",),
+        ("abc",),
     ])
-    @patch('client.get_json') # Patch 'get_json' where it's imported/used in client.py
-                              # The patch decorator will pass a Mock object as the last argument
-                              # to the test method (here, mock_get_json).
+    # FIX IS HERE: Patch 'utils.get_json' directly at its source module.
+    @patch('utils.get_json')
     def test_org(self, org_name: str, mock_get_json: Mock) -> None:
         """
         Tests that GithubOrgClient.org returns the correct value
         and that get_json is called once with the expected argument.
         """
         # Define the payload that our mocked get_json should return.
-        # This simulates the actual API response for the organization.
         test_payload = {"login": org_name}
         mock_get_json.return_value = test_payload
 
@@ -35,7 +33,7 @@ class TestGithubOrgClient(unittest.TestCase):
         client = GithubOrgClient(org_name)
 
         # Call the method under test.
-        # This call will internally use the mocked get_json.
+        # This call will now correctly use the mocked get_json.
         result = client.org()
 
         # Assertion 1: Verify that the mocked get_json was called exactly once

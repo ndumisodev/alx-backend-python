@@ -57,7 +57,7 @@ class TestGetJson(unittest.TestCase):
     def test_get_json(self, test_url: str, test_payload: dict,
                        mock_requests_get: Mock) -> None:
         """
-        Tests that get_json returns the expected result by mocking requests.get.
+        Tests that get_json returns the expected result by mocking requests.
         """
         # Configure the mock object
         mock_response = Mock()

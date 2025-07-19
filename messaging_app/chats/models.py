@@ -1,8 +1,6 @@
 from django.db import models
 import uuid
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import MinLengthValidator
-
 
 
 class User(AbstractUser):
@@ -33,19 +31,31 @@ class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-class Message(models.Model):
-    """
-    Model representing a message in a conversation
-    """
-    message_id = models.UUIDField(primary_key=True,default=uuid.uuid4, editable=False,db_index=True)
-    sender_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
-    message_body = models.TimeField(max_length=225, null=False)
-
-
 class Conversation(models.Model):
     """
     Model representing a conversation between users
     """
-    conversation_id = models.UUIDField(primary_key=True,default=uuid.uuid4, db_index=True)
-    participants_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    conversation_id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+        db_index=True
+    )
+    participants = models.ManyToManyField(User, related_name='conversations')
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Message(models.Model):
+    """
+    Model representing a message in a conversation
+    """
+    message_id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+        db_index=True
+    )
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
+    message_body = models.TextField(null=False)
+    sent_at = models.DateTimeField(auto_now_add=True)

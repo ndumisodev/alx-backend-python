@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from .models import User, Conversation, Message
 from django.contrib.auth.hashers import make_password
-from rest_framework.exceptions import ValidationError
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -12,10 +11,18 @@ class UserSerializer(serializers.ModelSerializer):
 
 class MessageSerializer(serializers.ModelSerializer):
     sender = UserSerializer(read_only=True, source='sender_id')
+    message_body = serializers.CharField()
 
     class Meta:
         model = Message
         fields = ['message_id', 'sender', 'message_body']
+
+    def validate_message_body(self, value):
+        if not value.strip():
+            raise serializers.ValidationError("Message body cannot be empty or just whitespace.")
+        if len(value) < 3:
+            raise serializers.ValidationError("Message body must be at least 3 characters.")
+        return value
 
 
 class ConversationSerializer(serializers.ModelSerializer):

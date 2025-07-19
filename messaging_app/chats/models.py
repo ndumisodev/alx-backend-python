@@ -12,7 +12,7 @@ class User(AbstractUser):
         HOST = 'host', 'Host'
         ADMIN = 'admin', 'Admin'
 
-    id = models.UUIDField(
+    user_id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
         editable=False,
@@ -29,6 +29,8 @@ class User(AbstractUser):
         null=False
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    password = models.CharField(max_length=128)
+
 
 
 class Conversation(models.Model):

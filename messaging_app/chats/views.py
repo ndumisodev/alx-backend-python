@@ -27,7 +27,14 @@ class ConversationViewSet(viewsets.ModelViewSet):
 class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
-    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
+    # permission_classes = [IsAuthenticated, IsParticipantOfConversation]
+
+    def get_queryset(self):
+        conversation_id = self.kwargs.get('conversation_id')
+        return Message.objects.filter(
+            conversation_id=conversation_id,
+            conversation__participants=self.request.user
+        )
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()

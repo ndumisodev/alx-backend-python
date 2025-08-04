@@ -6,17 +6,24 @@ from rest_framework.status import HTTP_403_FORBIDDEN
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
 from .permissions import IsParticipantOfConversation
+from .permissions import IsParticipantOfConversation
+from .filters import MessageFilter
+from django_filters.rest_framework import DjangoFilterBackend
 
 
-class ConversationViewSet(viewsets.ModelViewSet):
-    queryset = Conversation.objects.all()
-    serializer_class = ConversationSerializer
+
+class MessageViewSet(viewsets.ModelViewSet):
+    serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated, IsParticipantOfConversation]
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['participants__username']
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = MessageFilter
 
     def get_queryset(self):
-        # Only show conversations the user participates in
+        conversation_id = self.kwargs.get('conversation_id')
+        return Message.objects.filter(
+            conversation_id=conversation_id,
+            conversation__participants=self.request.user
+        )
         return Conversation.objects.filter(participants=self.request.user)
 
     def perform_create(self, serializer):

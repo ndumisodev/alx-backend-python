@@ -1,17 +1,24 @@
 from rest_framework import permissions
 
-class IsMessageOwner(permissions.BasePermission):
+class IsParticipantOfConversation(permissions.BasePermission):
     """
-    Custom permission to only allow owners of a message to access it.
+    Allow only participants of a conversation to view, update, delete messages.
     """
-    def has_object_permission(self, request, view, obj):
-        # Check if the user is the owner of the message
-        return obj.sender == request.user or obj.receiver == request.user
 
-class IsConversationParticipant(permissions.BasePermission):
-    """
-    Custom permission to only allow participants of a conversation to access it.
-    """
+    def has_permission(self, request, view):
+        # User must be authenticated
+        return request.user and request.user.is_authenticated
+
     def has_object_permission(self, request, view, obj):
-        # Check if the user is a participant in the conversation
-        return request.user in obj.participants.all()
+        """
+        Object-level permission:
+        - obj: Message or Conversation
+        - request.user must be one of the participants of obj.conversation
+        """
+        if hasattr(obj, 'participants'):
+            # obj is a Conversation
+            return request.user in obj.participants.all()
+        elif hasattr(obj, 'conversation'):
+            # obj is a Message
+            return request.user in obj.conversation.participants.all()
+        return False

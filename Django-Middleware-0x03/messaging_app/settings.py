@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'chats',
     'rest_framework_simplejwt',
-    'django_filter'
+    'django_filter',
     'chats.middleware.RequestLoggingMiddleware',
 ]
 

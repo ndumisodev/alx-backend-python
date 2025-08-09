@@ -5,7 +5,6 @@ from django.http import HttpResponseForbidden
 from django.http import JsonResponse
 
 
-
 class RequestLoggingMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -88,3 +87,29 @@ class OffensiveLanguageMiddleware:
         else:
             ip = request.META.get('REMOTE_ADDR')
         return ip
+    
+
+class RolepermissionMiddleware:
+    """
+    Middleware to restrict certain chat actions to admin or moderator roles only.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Skip role check for anonymous users
+        if request.user.is_authenticated:
+            # Here we assume the user model has a 'role' field
+            # Adjust the field name depending on your project
+            allowed_roles = ["admin", "moderator"]
+
+            # Extract user role
+            user_role = getattr(request.user, "role", None)
+
+            # Restrict if role not allowed
+            if user_role not in allowed_roles:
+                return HttpResponseForbidden("You do not have permission to perform this action.")
+
+        # Continue processing request
+        return self.get_response(request)

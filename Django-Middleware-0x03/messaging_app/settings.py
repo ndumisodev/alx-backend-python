@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django_filter',
     'chats.middleware.RequestLoggingMiddleware',
     'apps.core.middleware.logging_middleware.RequestLoggingMiddleware',
+    'chats.middleware.RestrictAccessByTimeMiddleware',
 ]
 
 

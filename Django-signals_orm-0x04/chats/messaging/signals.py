@@ -4,6 +4,12 @@ from django.dispatch import receiver
 from .models import Message, Notification
 from .models import Message, MessageHistory
 
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from .models import Message, MessageHistory
+
+
+
 
 @receiver(post_save, sender=Message)
 def create_notification(sender, instance, created, **kwargs):
@@ -13,25 +19,19 @@ def create_notification(sender, instance, created, **kwargs):
             message=instance
         )
 
-
 @receiver(pre_save, sender=Message)
 def log_message_edit(sender, instance, **kwargs):
-    """
-    Logs old content of a message before it is updated
-    """
-    if instance.pk:  # means the message already exists
+    if instance.pk:
         try:
             old_message = Message.objects.get(pk=instance.pk)
         except Message.DoesNotExist:
-            return  # message not found in DB
-
-        # Check if content actually changed
+            return
+        
         if old_message.content != instance.content:
-            # Save history
+            # Log the old content with info who edited (use instance.sender or request user if accessible)
             MessageHistory.objects.create(
                 message=old_message,
-                old_content=old_message.content
+                old_content=old_message.content,
+                edited_by=instance.sender  # assuming sender is the editor here
             )
-
-            # Mark message as edited
             instance.edited = True

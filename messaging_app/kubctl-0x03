@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e
+
+DEPLOYMENT_NAME="django-blue"
+NAMESPACE="default"
+
+echo "Applying updated deployment..."
+kubectl apply -f blue_deployment.yaml
+
+echo "Starting rolling update..."
+kubectl rollout status deployment/$DEPLOYMENT_NAME
+
+echo "Testing app availability with curl (press Ctrl+C to stop)..."
+while true; do
+    RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000)
+    TIMESTAMP=$(date +"%T")
+    echo "[$TIMESTAMP] HTTP status: $RESPONSE"
+    sleep 1
+done
+
+echo "Rolling update completed!"
+kubectl get pods -l app=django,version=blue

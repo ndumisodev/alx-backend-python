@@ -1,0 +1,21 @@
+#!/bin/bash
+set -e
+
+echo "Deploying Blue version..."
+kubectl apply -f blue_deployment.yaml
+kubectl apply -f kubeservice.yaml
+
+echo "Deploying Green version..."
+kubectl apply -f green_deployment.yaml
+
+echo "Waiting for Green pods to start..."
+sleep 10
+
+echo "Checking Green logs..."
+GREEN_PODS=$(kubectl get pods -l app=django,version=green -o name)
+kubectl logs $GREEN_PODS
+
+echo "If no errors above, switch service to Green..."
+kubectl patch service django-service -p '{"spec":{"selector":{"app":"django","version":"green"}}}'
+
+echo "Deployment switched to Green successfully!"

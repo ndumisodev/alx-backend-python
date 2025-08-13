@@ -1,0 +1,20 @@
+#!/bin/bash
+# kubctl-0x01
+# Script to scale Django app to 3 replicas and verify performance
+
+# Step 1: Scale the deployment to 3 replicas
+echo "Scaling Django messaging app to 3 replicas..."
+kubectl scale deployment django-messaging-app --replicas=3
+
+# Step 2: Verify that the pods are running
+echo "Checking running pods..."
+kubectl get pods -o wide
+
+# Step 3: Perform load testing with wrk
+# Assuming your app is exposed internally via ClusterIP and you have port-forwarded it to localhost:8000
+echo "Running load test with wrk..."
+wrk -t2 -c100 -d30s http://127.0.0.1:8000/
+
+# Step 4: Monitor resource usage
+echo "Monitoring resource usage..."
+kubectl top pods

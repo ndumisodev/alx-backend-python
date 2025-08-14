@@ -20,4 +20,4 @@ COPY . /app/
 EXPOSE 8000
 
 # 7. Command to run the app
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000 -p 8000"]

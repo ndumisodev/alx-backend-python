@@ -1,3 +1,4 @@
+# 1. Use Python 3.10 as the base image
 FROM python:3.10
 
 # 2. Set environment variables
